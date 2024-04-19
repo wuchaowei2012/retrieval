@@ -1,0 +1,17 @@
+
+FROM tensorflow/tensorflow:2.11.0-gpu
+
+ENV PYTHONUNBUFFERED True
+
+ENV APP_HOME /workspace
+
+WORKDIR $APP_HOME
+
+COPY /two_tower_jt $APP_HOME/src/two_tower_jt
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r $APP_HOME/src/two_tower_jt/requirements.txt
+
+RUN apt update && apt -y install nvtop
+
+RUN export PYTHONPATH=${PYTHONPATH}:${APP_HOME}/

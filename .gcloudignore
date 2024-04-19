@@ -1,0 +1,14 @@
+.gcloudignore
+/local_files/
+/img/
+*.pkl
+*.png
+.git
+.github
+.ipynb_checkpoints/*
+*__pycache__
+*cpython-37.pyc
+spotipy_secret_creds.py
+candidate_embs_local_20230130-180710.json
+vocab_dict.pkl
+/WIP/keep-local/*
