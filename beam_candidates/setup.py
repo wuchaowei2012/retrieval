@@ -8,8 +8,9 @@ NAME = 'create_tfrecords_candidates'
 
 VERSION = '1.1'
 REQUIRED_PACKAGES = [
-    'apache-beam[gcp]==2.41.0',
-    'tensorflow==2.8.0',
+    'protobuf==3.20.*',
+    'apache-beam[gcp]==2.55.1',
+    'tensorflow==2.9.0',
     'gcsfs==2022.8.2'
     ]
 

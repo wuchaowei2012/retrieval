@@ -24,7 +24,7 @@ TABLE_SPEC = f'{PROJECT_ID}:{BQ_DATASET}.{BQ_TABLE}' # need " : " between projec
 # Pipeline Params
 TIMESTAMP = datetime.utcnow().strftime('%y%m%d-%H%M%S')
 JOB_NAME = f'spotify-bq-tfrecords-{VERSION}-{TIMESTAMP}'
-MAX_WORKERS = '40'
+MAX_WORKERS = '5'
 RUNNER = 'DataflowRunner'
 
 # storage
@@ -57,6 +57,7 @@ args = {
     'setup_file': './setup.py',
     'folder': GCS_SUBFOLDER, # sys.argv[2], ## train or valid
     'bucket_name': BUCKET_NAME,
+    'max_workers':MAX_WORKERS,
 }
 
 print("Number of Expected TFRecords: {}".format(NUM_TF_RECORDS))

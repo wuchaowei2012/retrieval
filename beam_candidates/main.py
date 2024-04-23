@@ -40,7 +40,7 @@ CANDIDATE_DIR = ROOT + "/candidates/"
 QUERY = f"SELECT * FROM `{PROJECT_ID}.{BQ_DATASET}.{BQ_TABLE}`"
 
 # NUM_TF_RECORDS = 8
-
+print("@@@ JOB_NAME:", JOB_NAME)
 args = {
     'job_name': JOB_NAME,
     'runner': RUNNER,

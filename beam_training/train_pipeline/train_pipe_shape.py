@@ -25,7 +25,7 @@ from apache_beam.options.pipeline_options import SetupOptions
 
 # Pipeline Params
 TIMESTAMP = datetime.utcnow().strftime('%y%m%d-%H%M%S')
-MAX_WORKERS = '40'
+MAX_WORKERS = '1'
 RUNNER = 'DataflowRunner'
 AUTOSCALE = 'THROUGHPUT_BASED'
 
