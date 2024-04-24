@@ -1131,7 +1131,6 @@ class TheTwoTowers(tfrs.models.Model):
             use_cross_layer=use_cross_layer,
             use_dropout=use_dropout,
             dropout_rate=dropout_rate,
-            # max_playlist_length=max_playlist_length,
             max_tokens=max_tokens,
         )
 
@@ -1144,7 +1143,6 @@ class TheTwoTowers(tfrs.models.Model):
             use_cross_layer=use_cross_layer,
             use_dropout=use_dropout,
             dropout_rate=dropout_rate,
-            # max_playlist_length=max_playlist_length,
             max_tokens=max_tokens,
         )
         
@@ -1163,15 +1161,7 @@ class TheTwoTowers(tfrs.models.Model):
             name="two_tower_retreival_task"
         )
 
-        # self.task = tfrs.tasks.Retrieval(
-        #     metrics=tfrs.metrics.FactorizedTopK(
-        #         candidates=parsed_candidate_dataset.batch(128).map(
-        #             self.candidate_tower,
-        #             num_parallel_calls=tf.data.AUTOTUNE
-        #         ).prefetch(tf.data.AUTOTUNE)
-        #     )
-        # )
-                     
+
     def compute_loss(self, data, training=False):
         
         query_embeddings = self.query_tower(data)
