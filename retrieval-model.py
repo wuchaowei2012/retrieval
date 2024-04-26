@@ -12,9 +12,8 @@ import pickle as pkl
 import logging
 import time
 from pprint import pprint
-
+import time
 import scann
-
 
 
 # tensorflow
@@ -233,7 +232,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(
     )
 
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    filepath=LOCAL_CHECKPOINT_DIR + "/cp-{epoch:03d}-loss={loss:.2f}.ckpt", # cp-{epoch:04d}.ckpt" cp-{epoch:04d}.ckpt"
+    filepath=LOCAL_CHECKPOINT_DIR + "/cp-{epoch:03d}-loss={loss:.2f}.ckpt", 
     save_weights_only=True,
     save_best_only=True,
     monitor='total_loss',
@@ -254,11 +253,6 @@ layer_history = model.fit(
     validation_steps=100,
     callbacks=[
         tensorboard_callback, 
-        # train_utils.UploadTBLogsBatchEnd(
-        #     log_dir=LOG_DIR, 
-        #     experiment_name=EXPERIMENT_NAME, 
-        #     tb_resource_name=TB_RESOURCE_NAME
-        # ),
         model_checkpoint_callback
     ], 
     verbose=1
@@ -314,6 +308,8 @@ start_time = time.time()
 start_time = time.time()
 
 scann = tfrs.layers.factorized_top_k.ScaNN(
+    k=50,
+    query_model=model.query_tower,
     num_reordering_candidates=500,
     num_leaves_to_search=30
 )
@@ -327,59 +323,97 @@ scann.index_from_dataset(
     )
 )
 
-end_time = time.time()
+print("@@@\ttype of scann: ", type(scann))
+# import tempfile
 
-elapsed_scann_mins = int((end_time - start_time) / 60)
-print(f"elapsed_scann_mins: {elapsed_scann_mins}")
+# Need to call it to set the shapes.
+rst=scann({
+    'pl_name_src': np.array(["Get Pumped"]),
+    'pl_collaborative_src': np.array(["false"]),
+    'pl_duration_ms_new': np.array([1421560]),
+    # 'pl_duration_ms_new': np.array([3514214]),
+    'num_pl_songs_new': np.array([7.]),
+    'num_pl_artists_new': np.array([1.]),
+    'num_pl_albums_new': np.array([1.]),
+    'track_uri_pl': np.array([["spotify:track:3zjjzKg16tczCMwckGKGuH","spotify:track:3zjjzKg16tczCMwckGKGuH","spotify:track:3zjjzKg16tczCMwckGKGuH","spotify:track:3zjjzKg16tczCMwckGKGuH","spotify:track:3zjjzKg16tczCMwckGKGuH"]]),
+    'track_name_pl': np.array([[ "Happy Pills", "Happy Pills", "Happy Pills", "Happy Pills", "Happy Pills"]])
+})
 
+print("@@@\t result of scann: ", rst, " len:", len(rst))
+print("@@@\t result of scann: ", rst[0], "@@@", len(rst[0]))
 
-start_time = time.time()
+# with tempfile.TemporaryDirectory() as tmp:
 
-model.task.factorized_metrics = tfrs.metrics.FactorizedTopK(
-    candidates=scann
-)
-model.compile()
-
-scann_result = model.evaluate(
-    valid_dataset, 
-    return_dict=True, 
-    verbose=1
-)
-
-end_time = time.time()
-
-elapsed_scann_eval_mins = int((end_time - start_time) / 60)
-print(f"elapsed_scann_eval_mins: {elapsed_scann_eval_mins}")
-
-# Save the candidate embeddings to GCS for use in Matching Engine later
-start_time = time.time()
-
-candidate_embeddings = parsed_candidate_dataset.batch(10000).map(
-    lambda x: [
-        x['track_uri_can'],
-        train_utils.tf_if_null_return_zero(
-            model.candidate_tower(x)
-        )
-    ]
+path = os.path.join(f"./{int(time.time())}", "scannmodel")
+tf.saved_model.save(
+    scann,
+    path,
+    options=tf.saved_model.SaveOptions(namespace_whitelist=["Scann"])
 )
 
-elapsed_mins = int((time.time() - start_time) / 60)
-print(f"elapsed_mins: {elapsed_mins}")
-# candidate_embeddings
-len(list(candidate_embeddings))
-CANDIDATE_EMB_JSON = 'candidate_embeddings.json'
+loaded = tf.saved_model.load(path)
 
-start_time = time.time()
 
-for batch in candidate_embeddings:
-    songs, embeddings = batch
-    with open(CANDIDATE_EMB_JSON, 'a') as f:
-        for song, emb in zip(songs.numpy(), embeddings.numpy()):
-            f.write('{"id":"' + str(song) + '","embedding":[' + ",".join(str(x) for x in list(emb)) + ']}')
-            f.write("\n")
+
+
+
+
+
+
+
+# end_time = time.time()
+
+# elapsed_scann_mins = int((end_time - start_time) / 60)
+# print(f"elapsed_scann_mins: {elapsed_scann_mins}")
+
+
+# start_time = time.time()
+
+# model.task.factorized_metrics = tfrs.metrics.FactorizedTopK(
+#     candidates=scann
+# )
+# model.compile()
+
+# scann_result = model.evaluate(
+#     valid_dataset, 
+#     return_dict=True, 
+#     verbose=1
+# )
+
+# end_time = time.time()
+
+# elapsed_scann_eval_mins = int((end_time - start_time) / 60)
+# print(f"elapsed_scann_eval_mins: {elapsed_scann_eval_mins}")
+
+# # Save the candidate embeddings to GCS for use in Matching Engine later
+# start_time = time.time()
+
+# candidate_embeddings = parsed_candidate_dataset.batch(10000).map(
+#     lambda x: [
+#         x['track_uri_can'],
+#         train_utils.tf_if_null_return_zero(
+#             model.candidate_tower(x)
+#         )
+#     ]
+# )
+
+# elapsed_mins = int((time.time() - start_time) / 60)
+# print(f"elapsed_mins: {elapsed_mins}")
+# # candidate_embeddings
+# len(list(candidate_embeddings))
+# CANDIDATE_EMB_JSON = 'candidate_embeddings.json'
+
+# start_time = time.time()
+
+# for batch in candidate_embeddings:
+#     songs, embeddings = batch
+#     with open(CANDIDATE_EMB_JSON, 'a') as f:
+#         for song, emb in zip(songs.numpy(), embeddings.numpy()):
+#             f.write('{"id":"' + str(song) + '","embedding":[' + ",".join(str(x) for x in list(emb)) + ']}')
+#             f.write("\n")
             
-end_time = time.time()
+# end_time = time.time()
 
-elapsed_mins = int((end_time - start_time) / 60)
-print(f"elapsed_mins: {elapsed_mins}")
-print("embeddings:", embeddings)
+# elapsed_mins = int((end_time - start_time) / 60)
+# print(f"elapsed_mins: {elapsed_mins}")
+# print("embeddings:", embeddings)
