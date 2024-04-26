@@ -2,7 +2,7 @@ import json
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
-from google.cloud import storage
+# from google.cloud import storage
 
 import numpy as np
 import pickle as pkl
@@ -25,9 +25,9 @@ from . import train_config as cfg
 MAX_PLAYLIST_LENGTH = cfg.TRACK_HISTORY # 5
 PROJECT_ID = cfg.PROJECT_ID
 
-storage_client = storage.Client(
-    project=PROJECT_ID
-)
+# storage_client = storage.Client(
+#     project=PROJECT_ID
+# )
 
 # ======================
 # Vocab Adapts

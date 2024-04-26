@@ -7,7 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import logging
 
-from google.cloud import storage
+# from google.cloud import storage
 
 # ===================================================
 # get accelerator_config
@@ -143,11 +143,8 @@ class UploadTBLogsBatchEnd(tf.keras.callbacks.Callback):
 # Helper functions
 # ====================================================
 # upload files to Google Cloud Storage
+"""
 def upload_blob(bucket_name, source_file_name, destination_blob_name, project_id):
-    """Uploads a file to the bucket."""
-    # bucket_name = "your-bucket-name" (no 'gs://')
-    # source_file_name = "local/path/to/file" (file to upload)
-    # destination_blob_name = "folder/paths-to/storage-object-name"
     storage_client = storage.Client(project=project_id)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
@@ -157,9 +154,11 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name, project_id
     print(
         f"File {source_file_name} uploaded to {destination_blob_name}."
     )
-    
+"""
+
+"""Downloads a blob from the bucket."""
+"""
 def download_blob(project_id, bucket_name, source_blob_name, destination_file_name):
-    """Downloads a blob from the bucket."""
     storage_client = storage.Client(project=project_id)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(source_blob_name)
@@ -170,6 +169,7 @@ def download_blob(project_id, bucket_name, source_blob_name, destination_file_na
             source_blob_name, bucket_name, destination_file_name
         )
     )
+"""
     
 def get_buckets_20(MAX_VAL):
     """ 

@@ -9,8 +9,8 @@ WORKDIR $APP_HOME
 
 COPY /two_tower_jt $APP_HOME/src/two_tower_jt
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r $APP_HOME/src/two_tower_jt/requirements.txt
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple  --upgrade pip
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple  --no-cache-dir -r $APP_HOME/src/two_tower_jt/requirements.txt
 
 RUN apt update && apt -y install nvtop
 

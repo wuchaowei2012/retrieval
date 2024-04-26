@@ -3,7 +3,7 @@ import logging
 
 import tensorflow as tf
 
-from google.cloud import storage
+# from google.cloud import storage
 
 PROJECT_ID='hybrid-vertex'
 MAX_PLAYLIST_LENGTH = 5
@@ -13,11 +13,9 @@ MAX_PLAYLIST_LENGTH = 5
 # ====================================================
 
 # upload files to Google Cloud Storage
+"""Uploads a file to the bucket."""
+"""
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
-    """Uploads a file to the bucket."""
-    # bucket_name = "your-bucket-name" (no 'gs://')
-    # source_file_name = "local/path/to/file" (file to upload)
-    # destination_blob_name = "folder/paths-to/storage-object-name"
     storage_client = storage.Client(project=project_number)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
@@ -27,6 +25,7 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     print(
         f"File {source_file_name} uploaded to {destination_blob_name}."
     )
+"""
     
 def get_buckets_20(MAX_VAL):
     """ 
