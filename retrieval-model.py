@@ -344,7 +344,7 @@ print("@@@\t result of scann: ", rst[0], "@@@", len(rst[0]))
 
 # with tempfile.TemporaryDirectory() as tmp:
 
-path = os.path.join(f"./{int(time.time())}", "scannmodel")
+path = os.path.join(f"./scannmodel/{int(time.time())}", "scannmodel")
 tf.saved_model.save(
     scann,
     path,
