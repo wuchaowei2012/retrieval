@@ -16,12 +16,11 @@ from util.feature_set_utils import  get_candidate_features, parse_candidate_tfre
 
 from src.two_tower_jt import two_tower as tt
 from src.two_tower_jt import train_utils
-from src.two_tower_jt import feature_sets
 import warnings
 warnings.filterwarnings('ignore')
 
 
-CANDIDATE_MODEL_DIR = f'/data/fred/retrieval_google/retrieval_google/local_train_dir/local-train-v2/run-20240428-034031/model-dir/candidate_model'
+CANDIDATE_MODEL_DIR = f'/data/fred/retrieval_google/retrieval_google/local_train_dir/local-train-v2/run-20240428-093314/model-dir/candidate_model'
 print(f"CANDIDATE_MODEL_DIR: {CANDIDATE_MODEL_DIR}")
 
 
@@ -45,7 +44,7 @@ import glob
 candidate_files = []
 
 
-for blob in glob.glob("/data/fred/retrieval_google/retrieval_google/data/candidate/2024042714/*"):
+for blob in glob.glob("/data/fred/retrieval_google/retrieval_google/data/candidate/2024042720/*"):
     candidate_files.append(blob)
 
 # tf-data-option

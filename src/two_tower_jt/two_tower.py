@@ -7,7 +7,11 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 from pprint import pprint
-
+import gc
+from numba import cuda
+device = cuda.get_current_device()
+device.reset()
+gc.collect()
 
 # new fix to train image + ENTRY CMD 
 from . import train_utils
@@ -449,7 +453,7 @@ class Candidate_Model(tf.keras.Model):
         # ========================================
         
         # Feature: activity_spu_code
-        # 2249561
+        # 500009
         self.activity_spu_code_embedding = tf.keras.Sequential(
             [
                 tf.keras.layers.Hashing(num_bins=500009), # TODO
@@ -553,7 +557,6 @@ class Candidate_Model(tf.keras.Model):
             ], name="activity_id_emb_model"
         )
         
-        
         """
         # Feature: artist_name_can
         self.artist_name_can_embedding = tf.keras.Sequential(
@@ -574,7 +577,6 @@ class Candidate_Model(tf.keras.Model):
             ], name="artist_name_can_emb_model"
         )
         """
-        
 
         """
         # Feature: album_name_can
@@ -598,7 +600,7 @@ class Candidate_Model(tf.keras.Model):
         """
         # https://www.tensorflow.org/api_docs/python/tf/keras/layers/IntegerLookup
         # Feature: is_exchange
-        vocab = [0,1]
+        vocab = [0, 1]
         self.is_exchange_embedding = tf.keras.Sequential(
             [
                 tf.keras.layers.IntegerLookup(vocabulary=vocab),
@@ -831,8 +833,6 @@ class Candidate_Model(tf.keras.Model):
             ], name="track_mode_can_emb_model"
         )
         """
-        
-        
         # ========================================
         # Dense & Cross Layers
         # ========================================
@@ -917,6 +917,23 @@ class Candidate_Model(tf.keras.Model):
             return self.dense_layers(all_embs)
 
 
+class CustomRetrievalTask(tfrs.tasks.Retrieval):
+    def __init__(self, *args, regularizer=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.regularizer = regularizer
+
+    def compute_loss(self, *args, **kwargs):
+        # 计算基本损失
+        loss = super().compute_loss(*args, **kwargs)
+
+        # 添加正则化项
+        if self.regularizer is not None:
+            regularization_loss = self.regularizer()
+            loss += regularization_loss
+
+        return loss
+
+
 class TheTwoTowers(tfrs.models.Model):
     def __init__(
         self, 
@@ -958,6 +975,8 @@ class TheTwoTowers(tfrs.models.Model):
             max_tokens=max_tokens,
         )
         
+
+        """ 原始的task
         self.task = tfrs.tasks.Retrieval(
             metrics=tfrs.metrics.FactorizedTopK(
                 candidates=parsed_candidate_dataset
@@ -971,17 +990,129 @@ class TheTwoTowers(tfrs.models.Model):
             remove_accidental_hits=False,
             name="two_tower_retreival_task"
         )
-
-
+        """
+        
+        self.task = CustomRetrievalTask(
+            metrics=tfrs.metrics.FactorizedTopK(
+                candidates=parsed_candidate_dataset
+                .batch(128)
+                .map(lambda x: (x['activity_spu_code'], self.candidate_tower(x))), 
+                ks=(10, 50, 100)),
+            batch_metrics=[
+                tf.keras.metrics.TopKCategoricalAccuracy(10, name='batch_categorical_accuracy_at_10'), 
+                tf.keras.metrics.TopKCategoricalAccuracy(50, name='batch_categorical_accuracy_at_50')
+            ],
+            remove_accidental_hits=False,
+            name="two_tower_retreival_task",
+            regularizer=tf.keras.regularizers.L1(0.001)  # 添加 L2 正则化器
+        )
+                
+        
     def compute_loss(self, data, training=False):
         
         query_embeddings = self.query_tower(data)
         candidate_embeddings = self.candidate_tower(data)
         
-        return self.task(
-            query_embeddings, 
-            candidate_embeddings, 
+        # 计算正则化损失
+        # regularization_loss = sum(self.query_tower.losses) + sum(self.candidate_tower.losses)
+        # regularization_loss = sum(self.losses)
+        
+        # 计算任务损失
+        task_loss = self.task(
+            query_embeddings,
+            candidate_embeddings,
             compute_metrics=not training,
             candidate_ids=data['activity_spu_code'],
             compute_batch_metrics=True
         ) # turn off metrics to save time on training
+                
+        return task_loss 
+    
+# 使用自定义的 Retrieval Task
+"""
+class TheTwoTowers(tfrs.models.Model):
+    def __init__(
+        self, 
+        layer_sizes, 
+        vocab_dict, 
+        parsed_candidate_dataset,
+        embedding_dim,
+        projection_dim,
+        seed,
+        use_cross_layer,
+        use_dropout,
+        dropout_rate,
+        max_tokens,
+        compute_batch_metrics=False
+    ):
+        super().__init__()
+        
+        self.query_tower = Query_Model(
+            layer_sizes=layer_sizes, 
+            vocab_dict=vocab_dict,
+            embedding_dim=embedding_dim,
+            projection_dim=projection_dim,
+            seed=seed,
+            use_cross_layer=use_cross_layer,
+            use_dropout=use_dropout,
+            dropout_rate=dropout_rate,
+            max_tokens=max_tokens,
+        )
+
+        self.candidate_tower = Candidate_Model(
+            layer_sizes=layer_sizes, 
+            vocab_dict=vocab_dict,
+            embedding_dim=embedding_dim,
+            projection_dim=projection_dim,
+            seed=seed,
+            use_cross_layer=use_cross_layer,
+            use_dropout=use_dropout,
+            dropout_rate=dropout_rate,
+            max_tokens=max_tokens,
+        )
+        
+        # 增加正则化项
+        self.regularizer=tf.keras.regularizers.L2(0.001) 
+
+        self.task = tfrs.tasks.Retrieval(
+            metrics=tfrs.metrics.FactorizedTopK(
+                candidates=parsed_candidate_dataset
+                .batch(128)
+                .map(lambda x: (x['activity_spu_code'], self.candidate_tower(x))), 
+                ks=(10, 50, 100)),
+            batch_metrics=[
+                tf.keras.metrics.TopKCategoricalAccuracy(10, name='batch_categorical_accuracy_at_10'), 
+                tf.keras.metrics.TopKCategoricalAccuracy(50, name='batch_categorical_accuracy_at_50')
+            ],
+            remove_accidental_hits=False,
+            name="two_tower_retreival_task"
+        )
+        
+    def compute_loss(self, data, training=False):
+        
+        query_embeddings = self.query_tower(data)
+        candidate_embeddings = self.candidate_tower(data)
+        
+        # 计算正则化损失
+        # regularization_loss = sum(self.query_tower.losses) + sum(self.candidate_tower.losses)
+        # regularization_loss = sum(self.losses)
+        regularization_loss = 0.0
+        
+        # 计算任务损失
+        task_loss = self.task(
+            query_embeddings,
+            candidate_embeddings,
+            compute_metrics=not training,
+            candidate_ids=data['activity_spu_code'],
+            compute_batch_metrics=True
+        ) # turn off metrics to save time on training
+        
+        # 添加正则化项
+        if self.regularizer is not None:
+            regularization_loss = self.regularizer()
+            print("regularization_loss: ", regularization_loss)
+            loss += regularization_loss
+        
+        # 返回总损失（任务损失加上正则化损失）
+        return task_loss + regularization_loss
+"""

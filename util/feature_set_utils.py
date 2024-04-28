@@ -279,7 +279,6 @@ def parse_towers_tfrecord(example):
     example = tf.io.parse_example(
         example,
         feats
-        # features=feats
     )
     return example
 
@@ -293,7 +292,6 @@ def parse_rank_tfrecord(example):
     example = tf.io.parse_example(
         example,
         feats
-        # features=feats
     )
     return example
 

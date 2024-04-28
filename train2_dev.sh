@@ -20,12 +20,11 @@ ROOT_PATH="/data/fred/retrieval_google/retrieval_google"
 cd ${ROOT_PATH}
 
 CANDiDATE_DIR="${ROOT_PATH}/data/candidate/${d_current}"
-TRAINSET_DIR="${ROOT_PATH}/data/trainset/${d_current}"
 
 # /data/fred/anaconda3/envs/bertpy310/bin/
 python pyobs_tools_fast.py 'akc-bigdata' akc_alg_hour.db/alg_all_product240427/"${d_current:0:8}"/${d_current} ${CANDiDATE_DIR} "True"  part-r-0
 
-python pyobs_tools_fast.py 'akc-bigdata' akc_alg_hour.db/positive_dataset_240427/"${d_current:0:8}"/${d_current} ${TRAINSET_DIR} "True"  part-r-0
+
 
 exit 0
 ######## step2  清除数据

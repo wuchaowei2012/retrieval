@@ -38,7 +38,8 @@ USE_DROPOUT = True
 SEED = 1234
 MAX_PLAYLIST_LENGTH = 5
 EMBEDDING_DIM = 16   
-PROJECTION_DIM = int(EMBEDDING_DIM / 4) # 50  
+# PROJECTION_DIM = int(EMBEDDING_DIM / 4) 
+PROJECTION_DIM = int(EMBEDDING_DIM / 2) 
 SEED = 1234
 DROPOUT_RATE = 0.05
 MAX_TOKENS = 20000
@@ -72,7 +73,7 @@ print("LOCAL_EMB_FILE: ",LOCAL_EMB_FILE)
 
 
 candidate_files = []
-for blob in glob.glob("/data/fred/retrieval_google/retrieval_google/data/candidate/2024042714/*"):
+for blob in glob.glob("/data/fred/retrieval_google/retrieval_google/data/candidate/2024042720/*"):
     candidate_files.append(blob)
         
 print("candidate_files:", candidate_files)
@@ -112,8 +113,10 @@ dataset_size = train_dataset_raw.reduce(0, lambda x, _: x + 1).numpy()
 
 print("dataset_size:", dataset_size)
 # 定义训练集和测试集大小
-train_size = int(0.9 * dataset_size)
-test_size = dataset_size - train_size
+# train_size = int(0.95 * dataset_size)
+# test_size = dataset_size - train_size
+test_size=5
+train_size = dataset_size - test_size
 
 # 拆分数据集为训练集和测试集
 shuffle_buffer_size = 10000  # 可以根据数据集大小进行调整
@@ -133,6 +136,8 @@ train_dataset = train_dataset_0.interleave(
     batch_size 
 ).prefetch(
     tf.data.AUTOTUNE,
+).repeat(
+    NUM_EPOCHS,
 ).with_options(
     options
 )
@@ -155,6 +160,8 @@ valid_dataset = test_dataset_0.prefetch(
     batch_size
 ).prefetch(
     tf.data.AUTOTUNE,
+).repeat(
+    NUM_EPOCHS,
 ).with_options(
     options
 )
@@ -325,7 +332,7 @@ rst=scann({
 
 
 
-path = os.path.join(f"./scannmodel/{int(time.time())}", "scannmodel")
+path = os.path.join("./scannmodel/", f"{int(time.time())}")
 tf.saved_model.save(
     scann,
     path,
