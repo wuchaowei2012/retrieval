@@ -23,33 +23,34 @@ def get_candidate_features():
     '''
     candiate tower features
     '''
-    
     candidate_features = {
-        "track_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
-        "track_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "album_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),           
-        "album_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
-        "duration_ms_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
-        "track_pop_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
-        "artist_pop_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "artist_genres_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_followers_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        # new
-        # "track_pl_titles_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_danceability_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_energy_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_key_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_loudness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_mode_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_speechiness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_acousticness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_instrumentalness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_liveness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_valence_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_tempo_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_time_signature_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "activity_spu_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
+        "brand_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_first_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_second_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_third_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),           
+        "activity_mode_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
+        "activity_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        
+        "is_exchange":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_high_commission":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_hot":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_ka_brand":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_new":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_oversea":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_chaoji_pinpai":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_wholesale_pop":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_tuangou":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_virtual":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_jifen_duihuan":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_n_x_discount":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_n_x_cny":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_youxuan_haowu":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        
+        "tenant_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "comprehensive_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
+        "hour_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
+        "max_c_sale_price":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
     }
     
     return candidate_features
@@ -65,90 +66,122 @@ def get_all_features(MAX_PLAYLIST_LENGTH: int, ranker: bool = False):
         # ===================================================
         # candidate track features
         # ===================================================
-        "track_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
-        "track_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "album_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),           
-        "album_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
-        "duration_ms_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
-        "track_pop_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
-        "artist_pop_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "artist_genres_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "artist_followers_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        # "track_pl_titles_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_danceability_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_energy_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_key_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_loudness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_mode_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
-        "track_speechiness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_acousticness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_instrumentalness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_liveness_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_valence_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_tempo_can":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        "track_time_signature_can": tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "activity_spu_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
+        "brand_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_first_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_second_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "back_third_ctgy_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),           
+        "activity_mode_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
+        "activity_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),      
+        "max_c_sale_price":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
+        
+        "is_exchange":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_high_commission":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_hot":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+
+        "is_ka_brand":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_new":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_oversea":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_chaoji_pinpai":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_wholesale_pop":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_tuangou":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_virtual":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_jifen_duihuan":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_n_x_discount":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_n_x_cny":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "is_youxuan_haowu":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "tenant_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "comprehensive_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
+        "hour_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  
+
+        # ===================================================
+        # user features
+        # ===================================================        
+        "user_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "gmv_1y_ranking_type":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "promotion_sentivity_1y":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "addr_city_level":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "address_type":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "region_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        
+        "area_province_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "area_city_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "area_county_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "share_ranking_360d":tf.io.FixedLenFeature(dtype=tf.string, shape=()),    
+        
+        "is_seller":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),            
+        "is_distributor":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),      
+        
+        
+        "addr_number":tf.io.FixedLenFeature(dtype=tf.int64, shape=()), # todo 检查这个特征有没有遗漏            
+       
+ 
+        
+        "login_num_30d":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),    
+        "last7d_login_num":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),    
+        "share_num_360d":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),    
+        
+        "orders_30d":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "orders_7d":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        
+        "gmv_30d":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  
+        "gmv_7d":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),   
 
         # ===================================================
         # summary playlist features
         # ===================================================
-        "pl_name_src" : tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
-        'pl_collaborative_src' : tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
-        # 'num_pl_followers_src' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
-        'pl_duration_ms_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
-        'num_pl_songs_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  # num_pl_songs_new | n_songs_pl_new
-        'num_pl_artists_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
-        'num_pl_albums_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
-        # 'avg_track_pop_pl_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
-        # 'avg_artist_pop_pl_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
-        # 'avg_art_followers_pl_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
+        
+        # "pl_name_src" : tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
+        # 'pl_collaborative_src' : tf.io.FixedLenFeature(dtype=tf.string, shape=()), 
+        # 'pl_duration_ms_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
+        # 'num_pl_songs_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  # num_pl_songs_new | n_songs_pl_new
+        # 'num_pl_artists_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
+        # 'num_pl_albums_new' : tf.io.FixedLenFeature(dtype=tf.float32, shape=()), 
+        
 
         # ===================================================
         # ragged playlist-track features
         # ===================================================
         # bytes / string
-        "track_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "track_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "artist_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "artist_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)),
-        "album_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "album_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "artist_genres_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        # "tracks_playlist_titles_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "track_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "artist_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "artist_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "album_uri_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "album_name_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "artist_genres_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
 
         # Float List
-        "duration_ms_songs_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "track_pop_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "artist_pop_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "artists_followers_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_danceability_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_energy_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_key_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "track_loudness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_mode_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_speechiness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_acousticness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_instrumentalness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_liveness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
-        "track_valence_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
-        "track_tempo_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "duration_ms_songs_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "track_pop_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "artist_pop_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "artists_followers_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_danceability_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_energy_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_key_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "track_loudness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_mode_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_speechiness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_acousticness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_instrumentalness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_liveness_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
+        # "track_valence_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),
+        # "track_tempo_pl": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)), 
         
         # bytes / string
-        "track_time_signature_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
-
+        # "track_time_signature_pl": tf.io.FixedLenFeature(dtype=tf.string, shape=(MAX_PLAYLIST_LENGTH,)), 
     }
     
     # ===================================================
     # playlist-track rank labels
     # ===================================================
+    """
     if ranker == True:
         
         add_rank_entry = {"candidate_rank": tf.io.FixedLenFeature(dtype=tf.float32, shape=(MAX_PLAYLIST_LENGTH,)),}
         
-        # update feats dictionary with rank label
         feats.update(add_rank_entry)
-    
+    """
     return feats
 
 # ===================================================

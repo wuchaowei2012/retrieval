@@ -25,7 +25,7 @@ def get_candidate_features():
     '''
     
     candidate_features = {
-        "track_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
+        "activity_spu_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
         "track_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
         "artist_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
         "artist_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
@@ -65,7 +65,7 @@ def get_all_features(MAX_PLAYLIST_LENGTH: int, ranker: bool = False):
         # ===================================================
         # candidate track features
         # ===================================================
-        "track_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
+        "activity_spu_code":tf.io.FixedLenFeature(dtype=tf.string, shape=()),            
         "track_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
         "artist_uri_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
         "artist_name_can":tf.io.FixedLenFeature(dtype=tf.string, shape=()),

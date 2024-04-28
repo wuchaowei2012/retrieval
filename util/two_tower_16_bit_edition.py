@@ -116,7 +116,7 @@ parsed_candidate_dataset = candidate_dataset.interleave(
 
 client = storage.Client()
     
-class Playlist_Model(tf.keras.Model):
+class Query_Model(tf.keras.Model):
     def __init__(self, layer_sizes):
         super().__init__()
 
@@ -391,7 +391,7 @@ class Playlist_Model(tf.keras.Model):
         else:
             return self.dense_layers(all_embs)
 
-class Candidate_Track_Model(tf.keras.Model):
+class Candidate_Model(tf.keras.Model):
     def __init__(self, layer_sizes):
         super().__init__()
         
@@ -600,9 +600,9 @@ class TheTwoTowers(tfrs.models.Model):
 
     def __init__(self, layer_sizes ):
         super().__init__()
-        self.query_tower = Playlist_Model(layer_sizes)
+        self.query_tower = Query_Model(layer_sizes)
 
-        self.candidate_tower = Candidate_Track_Model(layer_sizes)
+        self.candidate_tower = Candidate_Model(layer_sizes)
 
         self.task = tfrs.tasks.Retrieval(
             metrics=tfrs.metrics.FactorizedTopK(

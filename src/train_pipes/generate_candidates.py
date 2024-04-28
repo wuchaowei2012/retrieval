@@ -159,7 +159,7 @@ def generate_candidates(
     
     embs_iter = parsed_candidate_dataset.batch(10000).map(
         lambda data: (
-            data["track_uri_can"],
+            data["activity_spu_code"],
             loaded_candidate_model(data)
         )
     )

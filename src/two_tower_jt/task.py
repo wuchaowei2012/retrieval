@@ -580,7 +580,7 @@ def main(args):
     
         candidate_embeddings = parsed_candidate_dataset.batch(10000).map(
             lambda x: [
-                x['track_uri_can'], 
+                x['activity_spu_code'], 
                 train_utils.tf_if_null_return_zero(
                     model.candidate_tower(x)
                 )

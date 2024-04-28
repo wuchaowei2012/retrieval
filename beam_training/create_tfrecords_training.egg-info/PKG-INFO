@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: create_tfrecords_training
-Version: 1.0
-Requires-Dist: protobuf==3.20.*
-Requires-Dist: apache-beam[gcp]==2.55.1
-Requires-Dist: tensorflow==2.9.0
-Requires-Dist: gcsfs==2022.8.2

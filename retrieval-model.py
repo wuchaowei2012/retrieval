@@ -226,8 +226,6 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(
     write_graph=True,
     embeddings_freq=EMBED_FREQ,
     embeddings_metadata=LOCAL_EMB_FILE
-    
-    
         # profile_batch=(20,50) #run profiler on steps 20-40 - enable this line if you want to run profiler from the utils/ notebook
     )
 
