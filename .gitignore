@@ -10,3 +10,7 @@ google-research
 ref
 data
 notebook
+logs
+trash
+
+.gitignore
