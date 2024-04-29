@@ -1007,7 +1007,9 @@ class TheTwoTowers(tfrs.models.Model):
             regularizer=tf.keras.regularizers.L1(0.001)  # 添加 L2 正则化器
         )
                 
-        
+    def call(self, inputs):  # 添加call方法以确保变量创建
+        return self.compute_loss(inputs)
+    
     def compute_loss(self, data, training=False):
         
         query_embeddings = self.query_tower(data)
