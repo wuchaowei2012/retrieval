@@ -51,6 +51,11 @@ def get_candidate_features():
         "comprehensive_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
         "hour_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
         "max_c_sale_price":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),
+        
+        "prd_sale_nums_l1h":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "prd_sale_nums_l1y":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "prd_share_cnt_l1h":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "prd_share_cnt_cd":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
     }
     
     return candidate_features
@@ -94,6 +99,12 @@ def get_all_features(MAX_PLAYLIST_LENGTH: int, ranker: bool = False):
         "comprehensive_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),      
         "hour_score":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  
 
+        "prd_sale_nums_l1h":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "prd_sale_nums_l1y":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        
+        "prd_share_cnt_l1h":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        "prd_share_cnt_cd":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),
+        
         # ===================================================
         # user features
         # ===================================================        
@@ -112,10 +123,7 @@ def get_all_features(MAX_PLAYLIST_LENGTH: int, ranker: bool = False):
         "is_seller":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),            
         "is_distributor":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),      
         
-        
         "addr_number":tf.io.FixedLenFeature(dtype=tf.int64, shape=()), # todo 检查这个特征有没有遗漏            
-       
- 
         
         "login_num_30d":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),    
         "last7d_login_num":tf.io.FixedLenFeature(dtype=tf.int64, shape=()),    
@@ -126,7 +134,29 @@ def get_all_features(MAX_PLAYLIST_LENGTH: int, ranker: bool = False):
         
         "gmv_30d":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),  
         "gmv_7d":tf.io.FixedLenFeature(dtype=tf.float32, shape=()),   
+        
+        "click_item_id":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "first_ctgr":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "second_ctgr":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "third_ctgr":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        
+        "area_province_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "area_city_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "area_county_name":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
 
+        # ===================================================
+        # context features
+        # ===================================================     
+        "device_model":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "device_brand":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        
+        "domain":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "hour":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "weekday":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "day":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "is_weekend":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        "scene":tf.io.FixedLenFeature(dtype=tf.string, shape=()),
+        
         # ===================================================
         # summary playlist features
         # ===================================================

@@ -14,39 +14,6 @@ gc.collect()
 # new fix to train image + ENTRY CMD 
 from . import train_utils
 
-_BINS_MAP = {}
-_VOCABULARY_LIST = {}
-
-
-def load_maps(vocabulary_path, bins_path):
-	print(("vocabulary_path:" + vocabulary_path))
-	tf.compat.v1.logging.info("vocabulary_path:" + vocabulary_path)
-	for root, dirs, files in os.walk(vocabulary_path):
-		for file_ in files:
-			with open(os.path.join(root, file_)) as fin:
-				m = []
-				for line in fin:
-					m.append(line.strip('\n'))
-				if len(m) > 0:
-					_VOCABULARY_LIST[file_] = m
-
-	for root, dirs, files in os.walk(bins_path):
-		for file_ in files:
-			with open(os.path.join(root, file_)) as fin:
-				m = []
-				for line in fin:
-					content = line.strip('\n')
-					if content == "":
-						continue
-
-					fields = content.split(',')
-					
-					for e in fields:
-						m.append(float(e))
-				if len(m) > 0:
-					m = sorted(m)
-					_BINS_MAP[file_] = m
-
 
 # ======================
 # Vocab Adapts
@@ -84,7 +51,42 @@ class Query_Model(tf.keras.Model):
         # ========================================
         # non-sequence playlist features
         # ========================================
+        """
+        # Feature: pl_name_src
+        self.pl_name_src_text_embedding = tf.keras.Sequential(
+            [
+                tf.keras.layers.TextVectorization(
+                    # max_tokens=max_tokens, 
+                    vocabulary=vocab_dict['pl_name_src'],
+                    ngrams=2, 
+                    name="pl_name_src_textvectorizor"
+                ),
+                tf.keras.layers.Embedding(
+                    input_dim=max_tokens, # + 1, 
+                    output_dim=embedding_dim,
+                    name="pl_name_src_emb_layer",
+                    mask_zero=False
+                ),
+                tf.keras.layers.GlobalAveragePooling1D(name="pl_name_src_1d"),
+            ], name="pl_name_src_text_embedding"
+        )
+        """
         
+        """
+        # Feature: pl_collaborative_src
+        self.pl_collaborative_src_embedding = tf.keras.Sequential(
+            [
+                tf.keras.layers.Hashing(num_bins=3), 
+                tf.keras.layers.Embedding(
+                    input_dim=3 + 1,
+                    output_dim=embedding_dim,
+                    mask_zero=False,
+                    name="pl_collaborative_emb_layer",
+                    input_shape=()
+                ),
+            ], name="pl_collaborative_emb_model"
+        )
+        """
 
         # Feature: addr_number
         self.addr_number_embedding = tf.keras.Sequential(
@@ -172,7 +174,7 @@ class Query_Model(tf.keras.Model):
             ], name="gmv_30d_emb_model"
         )
         
-        # Feature: gmv_7d 
+        # Feature: gmv_7d | n_songs_pl_new
         self.gmv_7d_embedding = tf.keras.Sequential(
             [
                 tf.keras.layers.Discretization(train_utils.get_buckets_20(1000)), 
@@ -207,292 +209,6 @@ class Query_Model(tf.keras.Model):
                 ),
             ], name="orders_7d_emb_model"
         )
-        
-        # domain
-        domain_voc = ["SaaSApplets",
-                    "xdWxH5","xdApplets","akcAppH5","xdApp","xApp","akcApp",
-                    ]
-        self.domain_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=domain_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=len(domain_voc) + 1, 
-                    output_dim=embedding_dim,
-                    name="domain_emb_layer",
-                ),
-            ], name="domain_emb_model"
-        )
-        
-        # hour
-        self.hour_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=[str(itm) for itm in range(0, 24)] + ["-1"]), 
-                tf.keras.layers.Embedding(
-                    input_dim=25 + 1, 
-                    output_dim=embedding_dim,
-                    name="hour_emb_layer",
-                ),
-            ], name="hour_emb_model"
-        )
-        
-        # weekday
-        weekday_voc=[str(itm) for itm in range(0, 7)] + ["-1"]
-        self.weekday_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=weekday_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=8 + 1, 
-                    output_dim=embedding_dim,
-                    name="weekday_emb_layer",
-                ),
-            ], name="weekday_emb_model"
-        )
-        
-        # day
-        day_voc= [str(itm) for itm in range(1, 32)] + ["-1"]
-        self.day_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=day_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=32 + 1, 
-                    output_dim=embedding_dim,
-                    name="day_emb_layer",
-                ),
-            ], name="day_emb_model"
-        )
-        
-        # is_weekend
-        self.is_weekend_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=["0", "1"]), 
-                tf.keras.layers.Embedding(
-                    input_dim=2 + 1, 
-                    output_dim=embedding_dim,
-                    name="is_weekend_emb_layer",
-                ),
-            ], name="is_weekend_emb_model"
-        )
-        
-        # scene
-        scene_voc=[
-            "detail_buytogether",
-            "xd_home_feed_v3"
-            "homeFeeds",
-            "detail_similar",
-            "cart_list",
-            "sass_search_todayRec",
-            "detail_offsale",
-            "order_list",
-            "personalCenter",
-            "detail_shortage",
-            "cartlist_buymore",
-            "today_hot_spu",
-            "product_detail",
-        ]
-        self.scene_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=scene_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=len(scene_voc) + 1, 
-                    output_dim=embedding_dim,
-                    name="scene_emb_layer",
-                ),
-            ], name="scene_emb_model"
-        )
-
-        # click_item_id_sep
-        self.click_item_id_sep_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Lambda(lambda x: tf.strings.split(x, sep=',')),
-                tf.keras.layers.Hashing(num_bins=500009), 
-                tf.keras.layers.Embedding(
-                    input_dim=500009+1, 
-                    output_dim=embedding_dim,
-                    name="click_item_id_sep_emb_layer",
-                    ),
-
-                tf.keras.layers.GlobalAveragePooling1D(name="click_item_id_sep"),
-            ], name="click_item_id_sep_emb_model")
-        
-        # first_ctgr_sep
-        self.first_ctgr_sep_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Lambda(lambda x: tf.strings.split(x, sep=',')),
-                tf.keras.layers.Hashing(num_bins=101), 
-                tf.keras.layers.Embedding(
-                    input_dim=101+1, 
-                    output_dim=embedding_dim,
-                    name="first_ctgr_sep_emb_layer",
-                    ),
-
-                tf.keras.layers.GlobalAveragePooling1D(name="first_ctgr_sep"),
-            ], name="first_ctgr_sep_emb_model")
-        
-        # second_ctgr_sep
-        self.second_ctgr_sep_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Lambda(lambda x: tf.strings.split(x, sep=',')),
-                tf.keras.layers.Hashing(num_bins=1009), 
-                tf.keras.layers.Embedding(
-                    input_dim=1009+1, 
-                    output_dim=embedding_dim,
-                    name="second_ctgr_sep_emb_layer",
-                    ),
-
-                tf.keras.layers.GlobalAveragePooling1D(name="second_ctgr_sep"),
-            ], name="second_ctgr_sep_emb_model")
-        
-        # third_ctgr_sep
-        self.third_ctgr_sep_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Lambda(lambda x: tf.strings.split(x, sep=',')),
-                tf.keras.layers.Hashing(num_bins=1009), 
-                tf.keras.layers.Embedding(
-                    input_dim=1009+1, 
-                    output_dim=embedding_dim,
-                    name="third_ctgr_sep_emb_layer",
-                    ),
-
-                tf.keras.layers.GlobalAveragePooling1D(name="third_ctgr_sep"),
-            ], name="third_ctgr_sep_emb_model")
-        
-        # print("@@@ _VOCABULARY_LIST:", _VOCABULARY_LIST)
-        
-        # device_model
-        device_model_voc= _VOCABULARY_LIST["device_model"]
-        self.device_model_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=device_model_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=3001 + 1, 
-                    output_dim=embedding_dim,
-                    name="device_model_layer",
-                ),
-            ], name="device_model_model"
-        )
-        
-        # demography
-                
-        # region_name = build_str_cate_colums_from_input("region_name")
-
-        # area_province_name
-        area_province_name_voc= _VOCABULARY_LIST["area_province_name"]
-        self.area_province_name_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=area_province_name_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=113 + 1, 
-                    output_dim=embedding_dim,
-                    name="area_province_name_embedding_layer",
-                ),
-            ], name="area_province_name_model"
-        )
-        
-        # area_city_name
-        area_city_name_voc= _VOCABULARY_LIST["area_city_name"]
-        self.area_city_name_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=area_city_name_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=5009 + 1, 
-                    output_dim=embedding_dim,
-                    name="area_city_name_embedding_layer",
-                ),
-            ], name="area_city_name_model"
-        )
-        
-        # area_county_name
-        area_county_name_voc= _VOCABULARY_LIST["area_county_name"]
-        self.area_county_name_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=area_county_name_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=10007 + 1, 
-                    output_dim=embedding_dim,
-                    name="area_county_name_embedding_layer",
-                ),
-            ], name="area_county_name_model"
-        )
-        
-        
-        # device_model
-        device_model_voc= _VOCABULARY_LIST["device_model"]
-        self.device_model_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=device_model_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=3001 + 1, 
-                    output_dim=embedding_dim,
-                    name="device_model_layer",
-                ),
-            ], name="device_model_model"
-        )
-        
-        # device_brand
-        device_brand_voc= _VOCABULARY_LIST["device_brand"]
-        self.device_brand_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.StringLookup(vocabulary=device_brand_voc), 
-                tf.keras.layers.Embedding(
-                    input_dim=3001 + 1, 
-                    output_dim=embedding_dim,
-                    name="device_brand_layer",
-                ),
-            ], name="device_brand_model"
-        )
-        
-        """
-        self.track_mode_pl_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Hashing(num_bins=3),
-                tf.keras.layers.Embedding(
-                    input_dim=3 + 1,
-                    output_dim=embedding_dim,
-                    mask_zero=False,
-                    name="track_mode_pl_emb_layer",
-                    input_shape=()
-                ),
-                tf.keras.layers.GlobalAveragePooling1D(name="track_mode_pl_1d"),
-            ], name="track_mode_pl_emb_model"
-        )
-        """
-        
-        """
-        # Feature: pl_name_src
-        self.pl_name_src_text_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.TextVectorization(
-                    # max_tokens=max_tokens, 
-                    vocabulary=vocab_dict['pl_name_src'],
-                    ngrams=2, 
-                    name="pl_name_src_textvectorizor"
-                ),
-                tf.keras.layers.Embedding(
-                    input_dim=max_tokens, # + 1, 
-                    output_dim=embedding_dim,
-                    name="pl_name_src_emb_layer",
-                    mask_zero=False
-                ),
-                tf.keras.layers.GlobalAveragePooling1D(name="pl_name_src_1d"),
-            ], name="pl_name_src_text_embedding"
-        )
-        """
-        
-        """
-        # Feature: pl_collaborative_src
-        self.pl_collaborative_src_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Hashing(num_bins=3), 
-                tf.keras.layers.Embedding(
-                    input_dim=3 + 1,
-                    output_dim=embedding_dim,
-                    mask_zero=False,
-                    name="pl_collaborative_emb_layer",
-                    input_shape=()
-                ),
-            ], name="pl_collaborative_emb_model"
-        )
-        """
         
         # ========================================
         # sequence playlist features
@@ -616,7 +332,22 @@ class Query_Model(tf.keras.Model):
         )
         """
 
-        
+        # Feature: time_signature_pl
+        """
+        self.time_signature_pl_embedding = tf.keras.Sequential(
+            [
+                tf.keras.layers.Hashing(num_bins=6),
+                tf.keras.layers.Embedding(
+                    input_dim=6 + 1,
+                    output_dim=embedding_dim,
+                    mask_zero=False,
+                    name="time_signature_pl_emb_layer",
+                    input_shape=()
+                ),
+                tf.keras.layers.GlobalAveragePooling1D(name="time_signature_pl_1d"),
+            ], name="time_signature_pl_emb_model"
+        )
+        """
         
         # ========================================
         # dense and cross layers
@@ -682,36 +413,8 @@ class Query_Model(tf.keras.Model):
                 self.addr_number_embedding(data["addr_number"]),
                 # self.is_seller_embedding(data["is_seller"]),
                 # self.is_distributor_embedding(data["is_distributor"]),
-                
-                # context
-                self.domain_embedding(data["domain"]),
-                self.hour_embedding(data["hour"]),
-                self.weekday_embedding(data["weekday"]),
-                self.day_embedding(data["day"]),
-                
-                self.is_weekend_embedding(data["is_weekend"]),
-                self.scene_embedding(data["scene"]),
-
-    
-                # device
-                # device_model
-                self.device_model_embedding(data["device_model"]),
-                self.device_brand_embedding(data["device_brand"]),
-
-
-                # demography
-                self.area_province_name_embedding(data["area_province_name"]),
-                self.area_city_name_embedding(data["area_city_name"]),
-                self.area_county_name_embedding(data["area_county_name"]),
-
         
                 # sequence features
-                self.click_item_id_sep_embedding(data["click_item_id"]),
-                self.first_ctgr_sep_embedding(data["first_ctgr"]),
-                self.second_ctgr_sep_embedding(data["second_ctgr"]),
-                self.third_ctgr_sep_embedding(data["third_ctgr"]),
-
-        
                 # self.track_uri_pl_embedding(data['track_uri_pl']),
                 # self.track_name_pl_embedding(tf.reshape(data['track_name_pl'], [-1, MAX_PLAYLIST_LENGTH, 1])),
             ], axis=1)
@@ -1087,63 +790,6 @@ class Candidate_Model(tf.keras.Model):
             ], name="max_c_sale_price_emb_model"
         )
         
-        # todo 增加销量转发量等核心指标的特征
-        # prd_sale_nums_l1h
-        bins_prd_sale_nums_l1h = _BINS_MAP["prd_sale_nums_l1h"]
-        print("@@@ \t bins_prd_sale_nums_l1h:", bins_prd_sale_nums_l1h)
-        self.prd_sale_nums_l1h_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Discretization(bins_prd_sale_nums_l1h),
-                tf.keras.layers.Embedding(
-                    input_dim=len(bins_prd_sale_nums_l1h) + 1, 
-                    output_dim=embedding_dim,
-                    name="prd_sale_nums_l1h_emb_layer",
-                ),
-            ], name="prd_sale_nums_l1h_emb_model"
-        )
-        # prd_share_cnt_l1h
-        bins_prd_share_cnt_l1h = _BINS_MAP["prd_share_cnt_l1h"]
-        self.prd_share_cnt_l1h_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Discretization(bins_prd_share_cnt_l1h),
-                tf.keras.layers.Embedding(
-                    input_dim=len(bins_prd_share_cnt_l1h) + 1, 
-                    output_dim=embedding_dim,
-                    name="prd_share_cnt_l1h_emb_layer",
-                ),
-            ], name="prd_share_cnt_l1h_emb_model"
-        )
-        
-        # prd_sale_nums_l1y
-        bins_prd_sale_nums_l1y = _BINS_MAP["prd_sale_nums_l1y"]
-        self.prd_sale_nums_l1y_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Discretization(bins_prd_sale_nums_l1y),
-                tf.keras.layers.Embedding(
-                    input_dim=len(bins_prd_sale_nums_l1y) + 1, 
-                    output_dim=embedding_dim,
-                    name="prd_sale_nums_l1y_emb_layer",
-                ),
-            ], name="prd_sale_nums_l1y_emb_model"
-        )
-        
-
-
-        
-        # prd_share_cnt_cd
-        bins_prd_share_cnt_cd = _BINS_MAP["prd_share_cnt_cd"]
-        self.prd_share_cnt_cd_embedding = tf.keras.Sequential(
-            [
-                tf.keras.layers.Discretization(bins_prd_share_cnt_cd),
-                tf.keras.layers.Embedding(
-                    input_dim=len(bins_prd_share_cnt_cd) + 1, 
-                    output_dim=embedding_dim,
-                    name="prd_share_cnt_cd_emb_layer",
-                ),
-            ], name="prd_share_cnt_cd_emb_model"
-        )
-
-        
         """
         # Feature: artist_genres_can
         self.artist_genres_can_embedding = tf.keras.Sequential(
@@ -1253,16 +899,11 @@ class Candidate_Model(tf.keras.Model):
 				self.is_n_x_discount_embedding(data['is_n_x_discount']),
 				self.is_n_x_cny_embedding(data['is_n_x_cny']),
 				self.is_youxuan_haowu_embedding(data['is_youxuan_haowu']),
-    
-                self.prd_sale_nums_l1h_embedding(data['prd_sale_nums_l1h']),
-                self.prd_sale_nums_l1y_embedding(data['prd_sale_nums_l1y']),
-                
-                self.prd_share_cnt_l1h_embedding(data['prd_share_cnt_l1h']),
-                self.prd_share_cnt_cd_embedding(data['prd_share_cnt_cd']),
-    
             ], axis=1
         )
         
+        # return self.dense_layers(all_embs)
+                # Build Cross Network
         if self._cross_layer is not None:
             cross_embs = self._cross_layer(all_embs)
             return self.dense_layers(cross_embs)

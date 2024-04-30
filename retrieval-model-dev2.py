@@ -1,14 +1,11 @@
 
 import os
 import numpy as np
-import pickle as pkl
 import time
 from pprint import pprint
 import time
 import scann
-
 import glob
-
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 
@@ -44,10 +41,8 @@ LAYER_SIZES=[128,64]
 
 LR = .05
 
-
-
 # train config
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1
 VALID_FREQUENCY = 5
 HIST_FREQ = 0
 EMBED_FREQ = 1
@@ -118,7 +113,7 @@ def get_dataset(options, batch_size, NUM_EPOCHS, trainset_path, shuffle_buffer_s
         cycle_length=tf.data.AUTOTUNE, 
         num_parallel_calls=tf.data.AUTOTUNE,
         deterministic=False,
-    ).shuffle(shuffle_buffer_size).map(feature_utils.parse_towers_tfrecord,num_parallel_calls=tf.data.AUTOTUNE).batch(batch_size).prefetch(tf.data.AUTOTUNE).repeat().with_options(options)
+    ).shuffle(shuffle_buffer_size).map(feature_utils.parse_towers_tfrecord,num_parallel_calls=tf.data.AUTOTUNE).batch(batch_size).prefetch(tf.data.AUTOTUNE).repeat(NUM_EPOCHS).with_options(options)
 
     if is_peek:
         for x in train_dataset.batch(1).take(1):
@@ -128,7 +123,7 @@ def get_dataset(options, batch_size, NUM_EPOCHS, trainset_path, shuffle_buffer_s
         tf.data.AUTOTUNE).interleave(train_utils.full_parse, num_parallel_calls=tf.data.AUTOTUNE,cycle_length=tf.data.AUTOTUNE,deterministic=False).map(
         feature_utils.parse_towers_tfrecord, 
         num_parallel_calls=tf.data.AUTOTUNE
-    ).batch(batch_size).prefetch(tf.data.AUTOTUNE).repeat().with_options(options)
+    ).batch(batch_size).prefetch(tf.data.AUTOTUNE).repeat(NUM_EPOCHS).with_options(options)
     
     return train_dataset,valid_dataset
 
@@ -167,7 +162,21 @@ def loadLatestCheckpoint(model):
         'addr_number': np.array([2]),
         'gmv_30d': np.array([7.]),
         'gmv_7d': np.array([1.]),
-        
+		'click_item_id': np.array(["click_item_id"]),
+		'first_ctgr': np.array(["first_ctgr"]),
+		'second_ctgr': np.array(["second_ctgr"]),
+		'third_ctgr': np.array(["third_ctgr"]),
+		'device_model': np.array(["device_model"]),
+		'device_brand': np.array(["device_brand"]),
+		
+		"domain":np.array(["domain"]),
+        "hour":np.array(["1"]),
+        "weekday":np.array(["2"]),
+        "day":np.array(["20"]),
+        "is_weekend":np.array(["0"]),
+        "scene":np.array(["scene"]),
+		
+        # 商品
         'activity_spu_code':np.array(["110"]),
         'brand_id':np.array(["110"]),
         'back_first_ctgy_id':np.array(["110"]),
@@ -175,6 +184,7 @@ def loadLatestCheckpoint(model):
         'back_third_ctgy_id':np.array(["110110110"]),
         'activity_mode_code':np.array(["2"]),
         'activity_id':np.array(["110110110"]),
+		
         'is_exchange': np.array([1]),
         'is_high_commission': np.array([1]),
         'is_hot': np.array([1]),
@@ -190,6 +200,11 @@ def loadLatestCheckpoint(model):
         'is_n_x_cny': np.array([1]),
         'is_youxuan_haowu': np.array([1]),
         'max_c_sale_price': np.array([20.]),
+		
+		'prd_sale_nums_l1h': np.array([10]),
+        'prd_sale_nums_l1y': np.array([100]),
+        'prd_share_cnt_l1h': np.array([1]),
+        'prd_share_cnt_cd': np.array([1]),
     }
     
     v= model(data)
@@ -362,13 +377,16 @@ if __name__ == "__main__":
 
     trainset_path = sys.argv[1]
     candidate_path= sys.argv[2]
+    
+    vocabulary_path="/data/fred/retrieval_google/retrieval_google/data/vocs"
+    bins_path="/data/fred/retrieval_google/retrieval_google/data/bins"
+    tt.load_maps(vocabulary_path, bins_path)
+ 
 
     parsed_candidate_dataset = get_candidate_data_set(candidate_path)
     train_dataset, valid_dataset = get_dataset(options, batch_size, NUM_EPOCHS, trainset_path)
 
     opt = tf.keras.optimizers.Adagrad(LR)
-
-    # print(f"PROJECTION_DIM: {PROJECTION_DIM}")
 
     model = tt.TheTwoTowers(
         layer_sizes=LAYER_SIZES, 
@@ -383,6 +401,7 @@ if __name__ == "__main__":
         max_tokens=MAX_TOKENS,
     )
     model=loadLatestCheckpoint(model)
+    # model.compile(optimizer=opt)
 
     tensorboard_callback = tf.keras.callbacks.TensorBoard(
         log_dir=os.path.join(LOCAL_TRAIN_DIR, "logs"), 
@@ -424,4 +443,4 @@ if __name__ == "__main__":
     print("metrics_dict:", metrics_dict)
 
 
-    save_scann_model(parsed_candidate_dataset, model)
+    # save_scann_model(parsed_candidate_dataset, model)

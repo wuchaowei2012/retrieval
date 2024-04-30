@@ -1,7 +1,7 @@
 
 #!/bin/bash
 # d_current=`date  "+%Y%m%d%H%M"`
-# d_current=2024042720
+# d_current=2024043014
 d_current=$1
 
 ROOT_PATH="/data/fred/retrieval_google/retrieval_google"
@@ -12,7 +12,7 @@ TRAINSETPATH="${ROOT_PATH}/data/trainset"
 rm -rf $TRAINSETPATH
 mkdir -p $TRAINSETPATH
 
-for i in {1..3}
+for i in {1..1}
 do   
    hours_ago=`date -d "${i} hours ago" "+%Y%m%d%H"`
    echo "hours_ago:${hours_ago}"
